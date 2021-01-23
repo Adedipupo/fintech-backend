@@ -55,6 +55,8 @@ app.use("/api", serviceRoutes);
 //   console.log(`Server is running on port ${port}`);
 // });
 
+app.listen(process.env.PORT, "0.0.0.0");
+
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
 });
