@@ -89,8 +89,6 @@ exports.processPayment = (req, res) => {
   let { phone, amount, pay_for } = req.body;
   let userId = req.profile.id;
   let name = req.profile.name;
-  const port = process.env.PORT || 8000;
-  console.log(`Hook url ${port}`);
 
   // console.log("profile", req.profile);
   let data = {
