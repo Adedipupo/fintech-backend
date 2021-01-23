@@ -92,7 +92,7 @@ exports.processPayment = (req, res) => {
 
   // console.log("profile", req.profile);
   let data = {
-    url: `https://chep-james.herokuapp.com//api/mpesa/mpesaWebHook/${userId}?`,
+    url: `https://chep-james.herokuapp.com/api/mpesa/mpesaWebHook/${userId}?`,
     params: {
       pay_for: pay_for,
       name: name,
