@@ -13,6 +13,8 @@ const transactionSchema = new mongoose.Schema(
     destination_number: String,
     message_description: String,
     transaction_number: String,
+    bank_name: String,
+    destination_account_number: String,
   },
   { timestamps: true }
 );

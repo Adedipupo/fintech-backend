@@ -3,6 +3,7 @@ const prettyjson = require("prettyjson");
 const request = require("request");
 const moment = require("moment");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const { encodeQuery } = require("../helpers/encodeQuery");
 
 const options = {
   noColor: true,
@@ -14,7 +15,6 @@ exports.mpesaWebHook = (req, res) => {
   // format and dump the request payload recieved from safaricom in the terminal
   console.log(prettyjson.render(req.body, options));
   console.log("-----------------------");
-  console.log(req.query);
   if (req.body.Body.stkCallback.ResultCode === 0) {
     let hookData = req.body.Body.stkCallback.CallbackMetadata.Item;
     let { pay_for } = req.query;
@@ -75,14 +75,6 @@ exports.generateMpesaToken = (req, res, next) => {
   );
 };
 
-function encodeQuery(data) {
-  let query = data.url;
-  for (let d in data.params)
-    query +=
-      encodeURIComponent(d) + "=" + encodeURIComponent(data.params[d]) + "&";
-  return query.slice(0, -1);
-}
-
 exports.processPayment = (req, res) => {
   // Json object that should be
   // converted to query parameter
@@ -90,7 +82,6 @@ exports.processPayment = (req, res) => {
   let userId = req.profile.id;
   let name = req.profile.name;
 
-  // console.log("profile", req.profile);
   let data = {
     url: `https://chep-james.herokuapp.com/api/mpesa/mpesaWebHook/${userId}?`,
     params: {
@@ -137,7 +128,6 @@ exports.processPayment = (req, res) => {
         return res.send(error);
       }
       return res.send(body);
-      // res.status(200).json(body);
     }
   );
 };

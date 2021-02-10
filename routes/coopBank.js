@@ -7,6 +7,8 @@ const {
   generatecoopBankToken,
   processPayment,
   coopBankWebHook,
+  checkBalance,
+  validateAccount,
 } = require("../controllers/coopBank");
 
 router.get("/coop/getToken", generatecoopBankToken);
@@ -14,8 +16,20 @@ router.post(
   "/coop/payment/processPayment/:userId",
   requireSignin,
   isAuth,
-  generatecoopBankToken,
+  // generatecoopBankToken,
   processPayment
+);
+router.post(
+  "/coop/payment/checkBalance/:userId",
+  requireSignin,
+  isAuth,
+  checkBalance
+);
+router.post(
+  "/coop/payment/validateAccount/:userId",
+  requireSignin,
+  isAuth,
+  validateAccount
 );
 router.post("/coop/coopBankWebHook/:userId", coopBankWebHook);
 router.param("userId", userById);

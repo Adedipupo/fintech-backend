@@ -1,15 +1,16 @@
 const Transaction = require("../models/transaction");
 const prettyjson = require("prettyjson");
 const request = require("request");
-const moment = require("moment");
-const uuid = require("uuid");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const { encodeQuery } = require("../helpers/encodeQuery");
+
+// require("https").globalAgent.options.ca = require("ssl-root-cas").create();
 
 const options = {
   noColor: true,
 };
 
-//  webhook endpoint to recive webhooks from Cooperative Bank
+//  webhook endpoint to receive webhooks from Cooperative Bank
 exports.coopBankWebHook = (req, res) => {
   console.log("-----------Received Cooperative Bank webhook-----------");
   // format and dump the request payload recieved from Cooperative Bank in the terminal
@@ -28,18 +29,18 @@ exports.coopBankWebHook = (req, res) => {
     let userId = req.profile.id;
 
     // save transaction to database
-
     let fields = {
       user: userId,
       messageReference,
-      narration: destination.narration,
+      paid_for: destination.narration,
       amount: destination.amount,
       mode: "Bank",
+      bank_name: "Co-operative Bank",
       transaction_id: destination.transactionID,
       transaction_date: messageDateTime,
       account_number: source.accountNumber,
-      destination_accountNumber: destination.accountNumber,
-      messageDescription,
+      destination_account_number: destination.accountNumber,
+      message_description: messageDescription,
     };
     let transaction = new Transaction(fields);
     transaction.save((err, result) => {
@@ -49,7 +50,7 @@ exports.coopBankWebHook = (req, res) => {
           error: errorHandler(err),
         });
       }
-      console.log("transaction saved successfully");
+      console.log("transaction saved successfully", result);
       res.json(result);
     });
   } else {
@@ -68,7 +69,7 @@ exports.generatecoopBankToken = (req, res, next) => {
   let auth = new Buffer.from(`${consumer_key}:${consumer_secret}`).toString(
     "base64"
   );
-  console.log(auth);
+
   request(
     {
       url: url,
@@ -78,58 +79,61 @@ exports.generatecoopBankToken = (req, res, next) => {
     },
     (error, response, body) => {
       if (error) {
-        console.log(error);
         res.json(error);
       } else {
         req.access_token = JSON.parse(body).access_token;
-        console.log(response);
-        console.log(req.access_token);
+        // console.log(req.access_token);
         next();
       }
     }
   );
 };
-function encodeQuery(data) {
-  let query = data.url;
-  for (let d in data.params)
-    query +=
-      encodeURIComponent(d) + "=" + encodeURIComponent(data.params[d]) + "&";
-  return query.slice(0, -1);
+
+function makeid(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
-//   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 exports.processPayment = (req, res) => {
   // Json object that should be
   // converted to query parameter
   let {
-    sourceAccountNumber,
-    destinationAccountNumber,
-    branchCode,
-    referenceNumber,
-    amount,
-    email,
-    narration,
-    messageReference,
+    SourceAccountNumber,
+    DestinationAccountNumber,
+    BranchCode,
+    SourceNarration,
+    DestinationNarration,
+    Amount,
   } = req.body;
   let userId = req.profile.id;
-  let access_token = "1a7e2bf3-abab-3c05-aaf7-f5a69186e0b9";
+  let name = req.profile.name;
+
+  let access_token = process.env.COOP_TEST_TOKEN; //your app access token;
 
   let data = {
-    url: `https://c814501fabb7.ngrok.io/api/coop/coopBankWebHook/${userId}`,
+    url: `https://chep-james.herokuapp.com/api/coop/coopBankWebHook/${userId}?`,
     params: {
-      paid_for: narration,
+      name: name,
     },
   };
   let callbackURL = encodeQuery(data);
   let endpoint =
     "https://developer.co-opbank.co.ke:8243/FundsTransfer/Internal/A2A/2.0.0";
   let auth = `Bearer ${access_token}`;
+  let messageReference = makeid(15);
+  let referenceNumber = makeid(21);
 
   request(
     {
       url: endpoint,
-      // rejectUnauthorized: false,
-
+      rejectUnauthorized: false,
+      requestCert: false,
       method: "POST",
       headers: {
         Authorization: auth,
@@ -138,18 +142,18 @@ exports.processPayment = (req, res) => {
         MessageReference: messageReference,
         CallBackUrl: callbackURL,
         Source: {
-          AccountNumber: sourceAccountNumber,
-          Amount: amount,
+          AccountNumber: SourceAccountNumber,
+          Amount: Amount,
           TransactionCurrency: "KES",
-          Narration: narration,
+          Narration: SourceNarration,
         },
         Destinations: [
           {
             ReferenceNumber: referenceNumber,
-            AccountNumber: destinationAccountNumber,
-            Amount: amount,
+            AccountNumber: "54321987654321",
+            Amount: Amount,
             TransactionCurrency: "KES",
-            Narration: narration,
+            Narration: DestinationNarration,
           },
         ],
       },
@@ -157,9 +161,75 @@ exports.processPayment = (req, res) => {
 
     function (error, response, body) {
       if (error) {
-        console.log(error);
+        console.log("processPayment", error);
+        return res.send(error);
       }
-      res.status(200).json(body);
+      return res.send(body);
+    }
+  );
+};
+
+exports.checkBalance = (req, res) => {
+  let { SourceAccountNumber } = req.body;
+  let access_token = process.env.COOP_TEST_TOKEN; //your app access token;
+
+  let endpoint =
+    "http://developer.co-opbank.co.ke:8280/Enquiry/AccountBalance/1.0.0";
+  let auth = `Bearer ${access_token}`;
+  let messageReference = makeid(15);
+
+  request(
+    {
+      url: endpoint,
+      method: "POST",
+      headers: {
+        Authorization: auth,
+      },
+      json: {
+        MessageReference: messageReference,
+        AccountNumber: SourceAccountNumber,
+      },
+    },
+
+    function (error, response, body) {
+      if (error) {
+        console.log("check Balance", error);
+        return res.send(error);
+      }
+      return res.send(body);
+    }
+  );
+};
+
+exports.validateAccount = (req, res) => {
+  let { SourceAccountNumber } = req.body;
+  let access_token = process.env.COOP_TEST_TOKEN; //your app access token;
+
+  let endpoint =
+    "https://developer.co-opbank.co.ke:8243/Enquiry/Validation/Account/1.0.0";
+  let auth = `Bearer ${access_token}`;
+  let messageReference = makeid(15);
+
+  request(
+    {
+      url: endpoint,
+      rejectUnauthorized: false,
+      requestCert: false,
+      method: "POST",
+      headers: {
+        Authorization: auth,
+      },
+      json: {
+        MessageReference: messageReference,
+        AccountNumber: SourceAccountNumber,
+      },
+    },
+
+    function (error, response, body) {
+      if (error) {
+        return res.send(error);
+      }
+      return res.send(body);
     }
   );
 };

@@ -1,4 +1,5 @@
 "use strict";
+// DATABASE=mongodb+srv://jamesmogambi:jamesmogambi@cluster0.zqjgi.mongodb.net/payment?retryWrites=true&w=majority
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -49,11 +50,11 @@ app.use("/api", coopBankRoutes);
 app.use("/api", chargeRoutes);
 app.use("/api", serviceRoutes);
 
-// const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8000;
 
-// app.listen(port, () => {
-//   console.log(`Server is running on port ${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 
 app.listen(process.env.PORT, "0.0.0.0");
 
