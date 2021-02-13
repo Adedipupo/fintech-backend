@@ -34,6 +34,10 @@ Use the below login so you can access admin areas:
 Use the below card to pay with Paypal or Credit Card:
 - 4111 1111 1111 1111 - 01/25 - 111
 
+Use the following test account number for Co-operative Bank Kenya:
+- 36001873000
+
+Other test accounts can be found at Co-operative Bank Developers portal available  [here](https://developer.co-opbank.co.ke:9443/store/apis/documentation)
 
 ## Technologies
 * Technologies used:
@@ -102,6 +106,8 @@ $ npm start
 ## Features
 *  Lipa Na M-Pesa online API endpoint available at `/api/mpesa/`
 *  Co-operative Bank of Kenya IFTAccountToAccount API endpoint available at `/api/coopBank/`
+*  Co-operative Bank of Kenya AccountValidation API endpoint available at `/coop/payment/validateAccount/`
+*  Co-operative Bank of Kenya AccountBalance API endpoint available at `/coop/payment/checkBalance/`
 *  Braintree API endpoint available at `/api/braintree/`
 *  User transactions API endpoint available at `/api/transactions/`
 *  Payment Services  API endpoint available at `/api/services/`
