@@ -63,7 +63,7 @@ $ cd payment-backend
  - Download and Install it from [mongodb.com](https://www.mongodb.com/try/download/community)
  
  #### 2. Get Lipa Na M-Pesa Online Credentials
- - Get Lipa Na M-Pesa test credentials from [Safaricom](https://www.braintreepayments.com/sandbox)
+ - Get Lipa Na M-Pesa test credentials from [Safaricom](https://developer.safaricom.co.ke/home)
  
  #### 3. Get Co-operative Bank of Kenya IFTAccountToAccount Credentials
  - Get Co-operative Bank of Kenya IFTAccountToAccount  credentials from [Co-operative Bank ](https://developer.co-opbank.co.ke:9443/store/apis/documentation#header9)
