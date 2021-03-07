@@ -1,5 +1,4 @@
 "use strict";
-// DATABASE=mongodb+srv://jamesmogambi:jamesmogambi@cluster0.zqjgi.mongodb.net/payment?retryWrites=true&w=majority
 
 const express = require("express");
 const mongoose = require("mongoose");
