@@ -80,13 +80,13 @@ exports.processPayment = (req, res) => {
   // converted to query parameter
   let { phone, amount, pay_for } = req.body;
   let userId = req.profile.id;
-  let name = req.profile.name;
+  let username = req.profile.username;
 
   let data = {
     url: `https://chep-james.herokuapp.com/api/mpesa/mpesaWebHook/${userId}?`,
     params: {
       pay_for: pay_for,
-      name: name,
+      username: username,
     },
   };
   let callbackURL = encodeQuery(data);
@@ -117,7 +117,7 @@ exports.processPayment = (req, res) => {
         PartyB: shortcode,
         PhoneNumber: phone,
         CallBackURL: callbackURL,
-        AccountReference: name,
+        AccountReference: username,
         TransactionDesc: "Process activation",
       },
     },

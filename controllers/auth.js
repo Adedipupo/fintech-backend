@@ -45,20 +45,20 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   // find the user based on email
-  const { email, password } = req.body;
-  User.findOne({ email }, (err, user) => {
+  const { username, password } = req.body;
+  User.findOne({ username }, (err, user) => {
     if (err || !user) {
       // return res.status(400).json({
       //   error: "User with that email does not exist. Please signup",
       // });
       return res
         .status(400)
-        .send("User with that email does not exist. Please signup.");
+        .send("User with that username does not exist. Please signup.");
     }
     // if user is found make sure the email and password match
     // create authenticate method in user model
     if (!user.authenticate(password)) {
-      return res.status(401).send("Email and password dont match");
+      return res.status(401).send("Username and password dont match");
     }
 
     // generate a signed token with user id and secret
@@ -69,7 +69,7 @@ exports.signin = (req, res) => {
     const { _id, name, email, payment_methods, role } = user;
     return res.json({
       token,
-      user: { _id, email, name, payment_methods, role },
+      user: { _id, email, username, payment_methods, role },
     });
   });
 };

@@ -112,14 +112,14 @@ exports.processPayment = (req, res) => {
     Amount,
   } = req.body;
   let userId = req.profile.id;
-  let name = req.profile.name;
+  let username = req.profile.username;
 
   let access_token = process.env.COOP_TEST_TOKEN; //your app access token;
 
   let data = {
     url: `https://chep-james.herokuapp.com/api/coop/coopBankWebHook/${userId}?`,
     params: {
-      name: name,
+      username: username,
     },
   };
   let callbackURL = encodeQuery(data);

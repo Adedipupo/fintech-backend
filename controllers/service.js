@@ -25,7 +25,7 @@ exports.remove = (req, res) => {
         error: errorHandler(err),
       });
     }
-    return res.send("Service deleted successfully");
+    return res.send("Service deleted successfully ");
   });
 };
 
