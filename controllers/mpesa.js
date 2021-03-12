@@ -4,7 +4,8 @@ const request = require("request");
 const moment = require("moment");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const { encodeQuery } = require("../helpers/encodeQuery");
-
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const options = {
   noColor: true,
 };
@@ -38,6 +39,31 @@ exports.mpesaWebHook = (req, res) => {
         });
       }
       console.log("transaction saved successfully");
+      // send email alert to user
+      const emailData = {
+        to: `${req.profile.email}`,
+        from: "coopbanktest77@gmail.com",
+        subject: `Payment successful`,
+        html: `
+          <p>Customer name:  ${req.profile.username}</p>
+ 
+          <p>Payment of amount ksh ${destination.amount} made successfuly via M-pesa  of  for ${destination.narration}.</p>
+         
+          <p>Payment Made to :  Organization Name</p>
+
+          <p>Mobile Number:  ${hookData[4].Value}</p>
+
+      `,
+      };
+      sgMail.send(emailData);
+      sgMail
+        .send(emailData)
+        .then(() => {
+          console.log("Email sent");
+        })
+        .catch((error) => {
+          console.error(error.response.body);
+        });
       res.json(result);
     });
   } else {

@@ -49,13 +49,13 @@ app.use("/api", coopBankRoutes);
 app.use("/api", chargeRoutes);
 app.use("/api", serviceRoutes);
 
-const port = process.env.PORT || 8000;
+// const port = process.env.PORT || 8000;
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
 
-// app.listen(process.env.PORT, "0.0.0.0");
+app.listen(process.env.PORT, "0.0.0.0");
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");

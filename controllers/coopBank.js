@@ -2,9 +2,8 @@ const Transaction = require("../models/transaction");
 const prettyjson = require("prettyjson");
 const request = require("request");
 const { errorHandler } = require("../helpers/dbErrorHandler");
-const { encodeQuery } = require("../helpers/encodeQuery");
-
-// require("https").globalAgent.options.ca = require("ssl-root-cas").create();
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const options = {
   noColor: true,
@@ -27,7 +26,7 @@ exports.coopBankWebHook = (req, res) => {
       destination,
     } = req.body;
     let userId = req.profile.id;
-
+    console.log("params", req.profile);
     // save transaction to database
     let fields = {
       user: userId,
@@ -51,6 +50,33 @@ exports.coopBankWebHook = (req, res) => {
         });
       }
       console.log("transaction saved successfully", result);
+
+      // send email alert to user
+      const emailData = {
+        to: `${req.profile.email}`,
+        from: "coopbanktest77@gmail.com",
+        subject: `Payment successful`,
+        html: `
+          <p>Customer name:  ${req.profile.username}</p>
+ 
+          <p>Payment of amount ksh ${destination.amount} made successfuly via Cooperative Bank of Kenya for ${destination.narration}.</p>
+
+          <p>Source Account Number:  ${source.accountNumber}</p>
+
+          <p>Destination Account Number:  ${destination.accountNumber}</p>
+
+
+      `,
+      };
+      sgMail.send(emailData);
+      sgMail
+        .send(emailData)
+        .then(() => {
+          console.log("Email sent");
+        })
+        .catch((error) => {
+          console.error(error.response.body);
+        });
       res.json(result);
     });
   } else {
@@ -112,17 +138,9 @@ exports.processPayment = (req, res) => {
     Amount,
   } = req.body;
   let userId = req.profile.id;
-  let username = req.profile.username;
-
   let access_token = process.env.COOP_TEST_TOKEN; //your app access token;
 
-  let data = {
-    url: `https://chep-james.herokuapp.com/api/coop/coopBankWebHook/${userId}?`,
-    params: {
-      username: username,
-    },
-  };
-  let callbackURL = encodeQuery(data);
+  let callbackURL = `https://chep-james.herokuapp.com/api/coop/coopBankWebHook/${userId}?`;
   let endpoint =
     "https://developer.co-opbank.co.ke:8243/FundsTransfer/Internal/A2A/2.0.0";
   let auth = `Bearer ${access_token}`;
@@ -153,7 +171,7 @@ exports.processPayment = (req, res) => {
             AccountNumber: "54321987654321",
             Amount: Amount,
             TransactionCurrency: "KES",
-            Narration: DestinationNarration,
+            Narration: SourceNarration,
           },
         ],
       },

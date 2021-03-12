@@ -3,7 +3,6 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 
 exports.create = (req, res) => {
   const service = new Service(req.body);
-
   service.save((err, service) => {
     if (err) {
       console.log(err);
