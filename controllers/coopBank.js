@@ -90,8 +90,7 @@ exports.generatecoopBankToken = (req, res, next) => {
   //Access token
   let consumer_key = process.env.COOP_CONSUMER_KEY; //your app consumer key
   let consumer_secret = process.env.COOP_CONSUMER_SECRET; //your app consumer secret
-  let url =
-    "https://developer.co-opbank.co.ke:8243/token?grant_type=client_credentials"; //Authentication url
+  let url = "https://openapi-sandbox.co-opbank.co.ke/token";
   let auth = new Buffer.from(`${consumer_key}:${consumer_secret}`).toString(
     "base64"
   );
@@ -108,7 +107,7 @@ exports.generatecoopBankToken = (req, res, next) => {
         res.json(error);
       } else {
         req.access_token = JSON.parse(body).access_token;
-        // console.log(req.access_token);
+        console.log(req.access_token);
         next();
       }
     }
